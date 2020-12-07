@@ -38,7 +38,8 @@ public class MainActivity extends AppCompatActivity
     Sensor sensor;
     int sensorID;
 
-    DatabaseReference myRef;
+    DatabaseReference sensorConfigRef;
+    DatabaseReference sensorValuesRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -58,7 +59,8 @@ public class MainActivity extends AppCompatActivity
         sensorID = 1;
 
         tvSensorID.setText(String.valueOf(sensorID));
-        myRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
+        sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
+        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));;
 
         // Updates the switch value when they're changed
         switchFan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         // Updates the sensor configs with the one saved in the firebase
-        myRef.addValueEventListener(new ValueEventListener()
+        sensorConfigRef.addValueEventListener(new ValueEventListener()
         {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot)
@@ -113,6 +115,27 @@ public class MainActivity extends AppCompatActivity
                     switchFan.setChecked(dbBoolFan);
                     switchWindow.setChecked(dbBoolWindow);
                     switchAutomatic.setChecked(dbBoolAutomatic);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
+            }
+        });
+
+        // Updates the ppm value with the one saved in the firebase
+        sensorValuesRef.addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                if(snapshot.exists())
+                {
+                    String dbCO2Value = snapshot.child("co2Value").getValue().toString();
+
+                    tvCO2Value.setText(dbCO2Value);
                 }
             }
 
@@ -158,8 +181,7 @@ public class MainActivity extends AppCompatActivity
             sensor.setBoolAutomatic(boolAutomatic);
 
             // Write a message to the database
-            //DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("Sensor");
-            myRef.setValue(sensor);
+            sensorConfigRef.setValue(sensor);
 
             Toast.makeText(MainActivity.this, "Saved successfully!", Toast.LENGTH_SHORT).show();
         }
