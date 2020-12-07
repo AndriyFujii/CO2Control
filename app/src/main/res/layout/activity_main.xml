@@ -34,6 +34,8 @@
                 android:id="@+id/tvSensorID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginTop="20dp"
                 android:text="#"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
@@ -58,6 +60,8 @@
                 android:id="@+id/tvPPM"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginTop="28dp"
                 android:layout_marginEnd="40dp"
                 android:layout_marginRight="40dp"
@@ -65,7 +69,7 @@
                 android:text="ppm"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.031"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/tvCO2Value"
                 app:layout_constraintTop_toBottomOf="@+id/tvSensor" />
 
@@ -99,7 +103,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/tvPPM" />
 
             <Switch
-                android:id="@+id/switchExhauster"
+                android:id="@+id/switchFan"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
@@ -108,7 +112,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
                 android:paddingLeft="5dp"
-                android:text="Exhauster"
+                android:text="Fan"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="22sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -130,7 +134,7 @@
                 android:textSize="22sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/switchExhauster" />
+                app:layout_constraintTop_toBottomOf="@+id/switchFan" />
 
             <Switch
                 android:id="@+id/switchAutomatic"
