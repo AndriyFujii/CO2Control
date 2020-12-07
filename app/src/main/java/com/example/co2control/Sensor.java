@@ -3,7 +3,7 @@ package com.example.co2control;
 public class Sensor
 {
     private int CO2Threshold;
-    private boolean boolExhauster;
+    private boolean boolFan;
     private boolean boolWindow;
     private boolean boolAutomatic;
 
@@ -22,14 +22,14 @@ public class Sensor
         this.CO2Threshold = CO2Threshold;
     }
 
-    public boolean isBoolExhauster()
+    public boolean isBoolFan()
     {
-        return boolExhauster;
+        return boolFan;
     }
 
-    public void setBoolExhauster(boolean boolExhauster)
+    public void setBoolFan(boolean boolFan)
     {
-        this.boolExhauster = boolExhauster;
+        this.boolFan = boolFan;
     }
 
     public boolean isBoolWindow() {

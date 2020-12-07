@@ -1,5 +1,6 @@
 package com.example.co2control;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -9,19 +10,26 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity
 {
+    TextView tvCO2Value;
+    TextView tvSensorID;
+
     EditText etCO2Threshold;
 
-    Switch switchExhauster;
+    Switch switchFan;
     Switch switchWindow;
     Switch switchAutomatic;
-    boolean boolExhauster;
+    boolean boolFan;
     boolean boolWindow;
     boolean boolAutomatic;
 
@@ -30,33 +38,40 @@ public class MainActivity extends AppCompatActivity
     Sensor sensor;
     int sensorID;
 
+    DatabaseReference myRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bSave = findViewById(R.id.bSave);
+        tvSensorID = findViewById(R.id.tvSensorID);
+        tvCO2Value = findViewById(R.id.tvCO2Value);
         etCO2Threshold = findViewById(R.id.etCO2Threshold);
-        switchExhauster = findViewById(R.id.switchExhauster);
+        switchFan = findViewById(R.id.switchFan);
         switchWindow = findViewById(R.id.switchWindow);
         switchAutomatic = findViewById(R.id.switchAutomatic);
+        bSave = findViewById(R.id.bSave);
 
         sensor = new Sensor();
         sensorID = 1;
 
-        switchExhauster.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        tvSensorID.setText(String.valueOf(sensorID));
+        myRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
+
+        // Updates the switch value when they're changed
+        switchFan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
             {
                 if(isChecked)
-                    boolExhauster = true;
+                    boolFan = true;
                 else
-                    boolExhauster = false;
+                    boolFan = false;
             }
         });
-
         switchWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
@@ -68,7 +83,6 @@ public class MainActivity extends AppCompatActivity
                     boolWindow = false;
             }
         });
-
         switchAutomatic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
@@ -78,6 +92,34 @@ public class MainActivity extends AppCompatActivity
                     boolAutomatic = true;
                 else
                     boolAutomatic = false;
+            }
+        });
+
+        // Updates the sensor configs with the one saved in the firebase
+        myRef.addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                if(snapshot.exists())
+                {
+                    String dbCO2Threshold = snapshot.child("co2Threshold").getValue().toString();
+                    boolean dbBoolFan = Boolean.valueOf(snapshot.child("boolFan").getValue().toString());
+                    boolean dbBoolWindow = Boolean.valueOf(snapshot.child("boolWindow").getValue().toString());
+                    boolean dbBoolAutomatic = Boolean.valueOf(snapshot.child("boolAutomatic").getValue().toString());
+
+
+                    etCO2Threshold.setText(dbCO2Threshold);
+                    switchFan.setChecked(dbBoolFan);
+                    switchWindow.setChecked(dbBoolWindow);
+                    switchAutomatic.setChecked(dbBoolAutomatic);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
             }
         });
     }
@@ -109,15 +151,15 @@ public class MainActivity extends AppCompatActivity
         {
             int CO2Threshold = Integer.parseInt(value);
 
+            // Write data to sensor class
             sensor.setCO2Threshold(CO2Threshold);
-            sensor.setBoolExhauster(boolExhauster);
+            sensor.setBoolFan(boolFan);
             sensor.setBoolWindow(boolWindow);
             sensor.setBoolAutomatic(boolAutomatic);
+
             // Write a message to the database
-            /*FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference myRef = database.getReference(String.valueOf(sensorID));*/
-            DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("Sensor");
-            myRef.child(String.valueOf(sensorID)).setValue(sensor);
+            //DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("Sensor");
+            myRef.setValue(sensor);
 
             Toast.makeText(MainActivity.this, "Saved successfully!", Toast.LENGTH_SHORT).show();
         }
