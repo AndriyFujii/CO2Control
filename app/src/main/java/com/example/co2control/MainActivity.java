@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity
 
     Button bSave;
 
+    Sensor sensor;
     int sensorID;
 
     @Override
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity
         switchWindow = findViewById(R.id.switchWindow);
         switchAutomatic = findViewById(R.id.switchAutomatic);
 
+        sensor = new Sensor();
         sensorID = 1;
 
         switchExhauster.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
@@ -105,10 +108,18 @@ public class MainActivity extends AppCompatActivity
         if(!error)
         {
             int CO2Threshold = Integer.parseInt(value);
+
+            sensor.setCO2Threshold(CO2Threshold);
+            sensor.setBoolExhauster(boolExhauster);
+            sensor.setBoolWindow(boolWindow);
+            sensor.setBoolAutomatic(boolAutomatic);
             // Write a message to the database
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference myRef = database.getReference(sensorID + "/test");
-            myRef.setValue("Hello, World!");
+            /*FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference myRef = database.getReference(String.valueOf(sensorID));*/
+            DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("Sensor");
+            myRef.child(String.valueOf(sensorID)).setValue(sensor);
+
+            Toast.makeText(MainActivity.this, "Saved successfully!", Toast.LENGTH_SHORT).show();
         }
     }
 }
