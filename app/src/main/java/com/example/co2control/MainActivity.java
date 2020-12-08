@@ -7,7 +7,10 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -93,6 +96,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    // Updates the sensor CO2 values from the database
     public void updateSensorValues()
     {
         sensorValuesRef.addListenerForSingleValueEvent(new ValueEventListener()
@@ -122,6 +126,14 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    // Hides the keyboard
+    private void hideKeyboard(View view) {
+        InputMethodManager manager = (InputMethodManager) view.getContext()
+                .getSystemService(INPUT_METHOD_SERVICE);
+        if (manager != null)
+            manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -146,6 +158,22 @@ public class MainActivity extends AppCompatActivity
         updateConfigValues();
         updateSensorValues();
 
+        // Updates the sensor ID value when ENTER is pressed, and closes the keyboard
+        etSensorID.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+            {
+                if(actionId == EditorInfo.IME_ACTION_DONE)
+                {
+                    etSensorID.clearFocus();
+                    hideKeyboard(v);
+                }
+                return false;
+            }
+        });
+
+        // When the Sensor ID loses focus, update its value
         etSensorID.setOnFocusChangeListener(new View.OnFocusChangeListener()
         {
             @Override
