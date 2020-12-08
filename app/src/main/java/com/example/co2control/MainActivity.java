@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     // Updates the app config values from the database
-    public void updateValues()
+    public void updateConfigValues()
     {
         sensorConfigRef.addListenerForSingleValueEvent(new ValueEventListener()
         {
@@ -93,6 +93,35 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    public void updateSensorValues()
+    {
+        sensorValuesRef.addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                if(snapshot.exists())
+                {
+                    String dbCO2Value = snapshot.child("co2Value").getValue().toString();
+
+                    tvCO2Value.setText(dbCO2Value);
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this, "Sensor data not found!", Toast.LENGTH_SHORT).show();
+
+                    tvCO2Value.setText("----");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -112,9 +141,10 @@ public class MainActivity extends AppCompatActivity
         sensorID = Integer.parseInt(etSensorID.getText().toString());
 
         sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
-        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues");
+        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));
 
-        updateValues();
+        updateConfigValues();
+        updateSensorValues();
 
         etSensorID.setOnFocusChangeListener(new View.OnFocusChangeListener()
         {
@@ -127,7 +157,9 @@ public class MainActivity extends AppCompatActivity
                     {
                         sensorID = Integer.parseInt(etSensorID.getText().toString());
                         sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
-                        updateValues();
+                        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));
+                        updateConfigValues();
+                        updateSensorValues();
                     }
                 }
             }
@@ -176,7 +208,7 @@ public class MainActivity extends AppCompatActivity
             {
                 if(snapshot.exists())
                 {
-                    String dbCO2Value = snapshot.child(String.valueOf(sensorID)).child("co2Value").getValue().toString();
+                    String dbCO2Value = snapshot.child("co2Value").getValue().toString();
 
                     tvCO2Value.setText(dbCO2Value);
                 }
