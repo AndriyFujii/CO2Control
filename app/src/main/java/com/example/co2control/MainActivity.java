@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -41,6 +43,21 @@ public class MainActivity extends AppCompatActivity
     DatabaseReference sensorConfigRef;
     DatabaseReference sensorValuesRef;
 
+    //Verifies if the editText is empty and pops an error if it is
+    //Receives the editText as parameter
+    //Returns true if it's empty
+    public boolean isEmpty(EditText et)
+    {
+        String validation = et.getText().toString();
+        if(TextUtils.isEmpty(validation))
+        {
+            et.setError("Can't be empty");
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -61,7 +78,24 @@ public class MainActivity extends AppCompatActivity
 
         //tvSensorID.setText(String.valueOf(sensorID));
         sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
-        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));;
+        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));
+
+        etSensorID.setOnFocusChangeListener(new View.OnFocusChangeListener()
+        {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus)
+            {
+                if(!hasFocus)
+                {
+                    if(!isEmpty(etSensorID))
+                    {
+                        sensorID = Integer.parseInt(etSensorID.getText().toString());
+                        sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
+                        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));
+                    }
+                }
+            }
+        });
 
         // Updates the switch value when they're changed
         switchFan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
@@ -152,20 +186,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    //Verifies if the editText is empty and pops an error if it is
-    //Receives the editText as parameter
-    //Returns true if it's empty
-    public boolean isEmpty(EditText et)
-    {
-        String validation = et.getText().toString();
-        if(TextUtils.isEmpty(validation))
-        {
-            et.setError("Can't be empty");
-            return true;
-        }
 
-        return false;
-    }
 
     public void onClickSave(View v)
     {
@@ -173,6 +194,8 @@ public class MainActivity extends AppCompatActivity
 
         boolean error = false;
         if(isEmpty(etCO2Threshold))
+            error = true;
+        if(isEmpty(etSensorID))
             error = true;
 
         if(!error)
