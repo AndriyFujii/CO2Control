@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity
         bSave = findViewById(R.id.bSave);
 
         sensor = new Sensor();
-        sensorID = 1;
+        sensorID = 2;
 
         tvSensorID.setText(String.valueOf(sensorID));
         sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
@@ -115,6 +115,10 @@ public class MainActivity extends AppCompatActivity
                     switchFan.setChecked(dbBoolFan);
                     switchWindow.setChecked(dbBoolWindow);
                     switchAutomatic.setChecked(dbBoolAutomatic);
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this, "Sensor not found in the database!", Toast.LENGTH_SHORT).show();
                 }
             }
 
