@@ -58,6 +58,41 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+    // Updates the app config values from the database
+    public void updateValues()
+    {
+        sensorConfigRef.addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                if(snapshot.exists())
+                {
+                    String dbCO2Threshold = snapshot.child("co2Threshold").getValue().toString();
+                    boolean dbBoolFan = Boolean.parseBoolean(snapshot.child("boolFan").getValue().toString());
+                    boolean dbBoolWindow = Boolean.parseBoolean(snapshot.child("boolWindow").getValue().toString());
+                    boolean dbBoolAutomatic = Boolean.parseBoolean(snapshot.child("boolAutomatic").getValue().toString());
+
+
+                    etCO2Threshold.setText(dbCO2Threshold);
+                    switchFan.setChecked(dbBoolFan);
+                    switchWindow.setChecked(dbBoolWindow);
+                    switchAutomatic.setChecked(dbBoolAutomatic);
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this, "Sensor not found!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -73,12 +108,13 @@ public class MainActivity extends AppCompatActivity
         bSave = findViewById(R.id.bSave);
 
         sensor = new Sensor();
-        //sensorID = 1;
+
         sensorID = Integer.parseInt(etSensorID.getText().toString());
 
-        //tvSensorID.setText(String.valueOf(sensorID));
         sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
-        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));
+        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues");
+
+        updateValues();
 
         etSensorID.setOnFocusChangeListener(new View.OnFocusChangeListener()
         {
@@ -91,7 +127,7 @@ public class MainActivity extends AppCompatActivity
                     {
                         sensorID = Integer.parseInt(etSensorID.getText().toString());
                         sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
-                        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));
+                        updateValues();
                     }
                 }
             }
@@ -132,39 +168,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        // Updates the sensor configs with the one saved in the firebase
-        sensorConfigRef.addValueEventListener(new ValueEventListener()
-        {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
-            {
-                if(snapshot.exists())
-                {
-                    String dbCO2Threshold = snapshot.child("co2Threshold").getValue().toString();
-                    boolean dbBoolFan = Boolean.valueOf(snapshot.child("boolFan").getValue().toString());
-                    boolean dbBoolWindow = Boolean.valueOf(snapshot.child("boolWindow").getValue().toString());
-                    boolean dbBoolAutomatic = Boolean.valueOf(snapshot.child("boolAutomatic").getValue().toString());
-
-
-                    etCO2Threshold.setText(dbCO2Threshold);
-                    switchFan.setChecked(dbBoolFan);
-                    switchWindow.setChecked(dbBoolWindow);
-                    switchAutomatic.setChecked(dbBoolAutomatic);
-                }
-                else
-                {
-                    Toast.makeText(MainActivity.this, "Sensor not found in the database!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error)
-            {
-
-            }
-        });
-
-        // Updates the ppm value with the one saved in the firebase
+        // Updates the ppm value whenever it changes with the one saved in the firebase
         sensorValuesRef.addValueEventListener(new ValueEventListener()
         {
             @Override
@@ -172,7 +176,7 @@ public class MainActivity extends AppCompatActivity
             {
                 if(snapshot.exists())
                 {
-                    String dbCO2Value = snapshot.child("co2Value").getValue().toString();
+                    String dbCO2Value = snapshot.child(String.valueOf(sensorID)).child("co2Value").getValue().toString();
 
                     tvCO2Value.setText(dbCO2Value);
                 }
@@ -185,8 +189,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-
-
 
     public void onClickSave(View v)
     {
