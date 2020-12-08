@@ -25,30 +25,40 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+import com.jjoe64.graphview.series.PointsGraphSeries;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
 {
-    TextView tvCO2Value;
-    TextView tvPPM;
+    private TextView tvCO2Value;
+    private TextView tvPPM;
 
-    EditText etCO2Threshold;
-    EditText etSensorID;
+    private EditText etCO2Threshold;
+    private EditText etSensorID;
 
-    Switch switchFan;
-    Switch switchWindow;
-    Switch switchAutomatic;
-    boolean boolFan;
-    boolean boolWindow;
-    boolean boolAutomatic;
+    private Switch switchFan;
+    private Switch switchWindow;
+    private Switch switchAutomatic;
+    private boolean boolFan;
+    private boolean boolWindow;
+    private boolean boolAutomatic;
 
-    Button bSave;
+    private Sensor sensor;
+    private int sensorID;
+    private int CO2Threshold;
 
-    Sensor sensor;
-    int sensorID;
-    int CO2Threshold;
+    private DatabaseReference sensorConfigRef;
+    private DatabaseReference sensorValuesRef;
 
-    DatabaseReference sensorConfigRef;
-    DatabaseReference sensorValuesRef;
+    LineGraphSeries<DataPoint> series;
+    GraphView valuesLinePlot;
+    private ArrayList<Integer> valuesArray;
+    private int x;
 
     //Verifies if the editText is empty and pops an error if it is
     //Receives the editText as parameter
@@ -142,6 +152,13 @@ public class MainActivity extends AppCompatActivity
             manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
+
+
+    private void createLinePlot()
+    {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -155,12 +172,17 @@ public class MainActivity extends AppCompatActivity
         switchFan = findViewById(R.id.switchFan);
         switchWindow = findViewById(R.id.switchWindow);
         switchAutomatic = findViewById(R.id.switchAutomatic);
-        bSave = findViewById(R.id.bSave);
+        valuesLinePlot = findViewById(R.id.valuesPlot);
+        valuesArray = new ArrayList<>();
+        series = new LineGraphSeries<>();
 
         sensor = new Sensor();
 
         sensorID = Integer.parseInt(etSensorID.getText().toString());
         CO2Threshold = 9999;
+        x = 0;
+        valuesLinePlot.getViewport().setXAxisBoundsManual(true);
+
 
         sensorConfigRef = FirebaseDatabase.getInstance().getReference()
                 .child("SensorConfigs")
@@ -255,7 +277,15 @@ public class MainActivity extends AppCompatActivity
                 {
                     String dbCO2Value = snapshot.child("co2Value").getValue().toString();
 
+                    valuesLinePlot.getViewport().setMinX(x);
+                    valuesLinePlot.getViewport().setMaxX(x+10);
+                    series.appendData(new DataPoint(x, Integer.parseInt(dbCO2Value)), true, 100);
+                    valuesLinePlot.addSeries(series);
+                    x++;
+
                     tvCO2Value.setText(dbCO2Value);
+
+                    valuesArray.add(Integer.parseInt(dbCO2Value));
                     if(Integer.parseInt(dbCO2Value) > CO2Threshold)
                     {
                         tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
