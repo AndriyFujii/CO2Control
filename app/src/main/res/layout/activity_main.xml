@@ -13,8 +13,8 @@
         style="@android:style/Widget.DeviceDefault.Light.ScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="-44dp">
+        tools:layout_editor_absoluteX="-74dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -24,25 +24,28 @@
                 android:id="@+id/tvSensor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="16dp"
                 android:text="Sensor"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.48"
+                app:layout_constraintHorizontal_bias="0.401"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/tvSensorID"
+            <EditText
+                android:id="@+id/etSensorID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginLeft="5dp"
-                android:layout_marginTop="20dp"
-                android:text="#"
+                android:layout_marginTop="16dp"
+                android:background="#EDE1FF"
+                android:ems="2"
+                android:inputType="number"
+                android:maxLength="4"
+                android:text="1"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/tvSensor"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -53,6 +56,7 @@
                 android:layout_marginTop="28dp"
                 android:text="----"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                android:textColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.376"
                 app:layout_constraintStart_toStartOf="parent"
@@ -70,6 +74,7 @@
                 android:fontFamily="sans-serif"
                 android:text="ppm"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                android:textColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/tvCO2Value"

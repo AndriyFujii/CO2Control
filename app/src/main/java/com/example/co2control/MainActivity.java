@@ -22,9 +22,9 @@ import com.google.firebase.database.ValueEventListener;
 public class MainActivity extends AppCompatActivity
 {
     TextView tvCO2Value;
-    TextView tvSensorID;
 
     EditText etCO2Threshold;
+    EditText etSensorID;
 
     Switch switchFan;
     Switch switchWindow;
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tvSensorID = findViewById(R.id.tvSensorID);
+        etSensorID = findViewById(R.id.etSensorID);
         tvCO2Value = findViewById(R.id.tvCO2Value);
         etCO2Threshold = findViewById(R.id.etCO2Threshold);
         switchFan = findViewById(R.id.switchFan);
@@ -56,9 +56,10 @@ public class MainActivity extends AppCompatActivity
         bSave = findViewById(R.id.bSave);
 
         sensor = new Sensor();
-        sensorID = 2;
+        //sensorID = 1;
+        sensorID = Integer.parseInt(etSensorID.getText().toString());
 
-        tvSensorID.setText(String.valueOf(sensorID));
+        //tvSensorID.setText(String.valueOf(sensorID));
         sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
         sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));;
 
