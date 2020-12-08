@@ -2,7 +2,9 @@ package com.example.co2control;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -27,6 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 public class MainActivity extends AppCompatActivity
 {
     TextView tvCO2Value;
+    TextView tvPPM;
 
     EditText etCO2Threshold;
     EditText etSensorID;
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity
 
     Sensor sensor;
     int sensorID;
+    int CO2Threshold;
 
     DatabaseReference sensorConfigRef;
     DatabaseReference sensorValuesRef;
@@ -72,6 +76,7 @@ public class MainActivity extends AppCompatActivity
                 if(snapshot.exists())
                 {
                     String dbCO2Threshold = snapshot.child("co2Threshold").getValue().toString();
+                    CO2Threshold = Integer.parseInt(dbCO2Threshold);
                     boolean dbBoolFan = Boolean.parseBoolean(snapshot.child("boolFan").getValue().toString());
                     boolean dbBoolWindow = Boolean.parseBoolean(snapshot.child("boolWindow").getValue().toString());
                     boolean dbBoolAutomatic = Boolean.parseBoolean(snapshot.child("boolAutomatic").getValue().toString());
@@ -108,11 +113,14 @@ public class MainActivity extends AppCompatActivity
                 {
                     String dbCO2Value = snapshot.child("co2Value").getValue().toString();
 
+                   // tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
                     tvCO2Value.setText(dbCO2Value);
                 }
                 else
                 {
-                    Toast.makeText(MainActivity.this, "Sensor data not found!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,
+                            "Sensor data not found!",
+                            Toast.LENGTH_SHORT).show();
 
                     tvCO2Value.setText("----");
                 }
@@ -142,6 +150,7 @@ public class MainActivity extends AppCompatActivity
 
         etSensorID = findViewById(R.id.etSensorID);
         tvCO2Value = findViewById(R.id.tvCO2Value);
+        tvPPM = findViewById(R.id.tvPPM);
         etCO2Threshold = findViewById(R.id.etCO2Threshold);
         switchFan = findViewById(R.id.switchFan);
         switchWindow = findViewById(R.id.switchWindow);
@@ -151,12 +160,16 @@ public class MainActivity extends AppCompatActivity
         sensor = new Sensor();
 
         sensorID = Integer.parseInt(etSensorID.getText().toString());
+        CO2Threshold = 9999;
 
-        sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
-        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));
+        sensorConfigRef = FirebaseDatabase.getInstance().getReference()
+                .child("SensorConfigs")
+                .child(String.valueOf(sensorID));
+        sensorValuesRef = FirebaseDatabase.getInstance().getReference()
+                .child("SensorValues")
+                .child(String.valueOf(sensorID));
 
         updateConfigValues();
-        updateSensorValues();
 
         // Updates the sensor ID value when ENTER is pressed, and closes the keyboard
         etSensorID.setOnEditorActionListener(new TextView.OnEditorActionListener()
@@ -184,8 +197,12 @@ public class MainActivity extends AppCompatActivity
                     if(!isEmpty(etSensorID))
                     {
                         sensorID = Integer.parseInt(etSensorID.getText().toString());
-                        sensorConfigRef = FirebaseDatabase.getInstance().getReference().child("SensorConfigs").child(String.valueOf(sensorID));
-                        sensorValuesRef = FirebaseDatabase.getInstance().getReference().child("SensorValues").child(String.valueOf(sensorID));
+                        sensorConfigRef = FirebaseDatabase.getInstance().getReference()
+                                .child("SensorConfigs")
+                                .child(String.valueOf(sensorID));
+                        sensorValuesRef = FirebaseDatabase.getInstance().getReference()
+                                .child("SensorValues")
+                                .child(String.valueOf(sensorID));
                         updateConfigValues();
                         updateSensorValues();
                     }
@@ -239,6 +256,16 @@ public class MainActivity extends AppCompatActivity
                     String dbCO2Value = snapshot.child("co2Value").getValue().toString();
 
                     tvCO2Value.setText(dbCO2Value);
+                    if(Integer.parseInt(dbCO2Value) > CO2Threshold)
+                    {
+                        tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
+                        tvPPM.setTextColor(Color.parseColor("#FF0000"));
+                    }
+                    else
+                    {
+                        tvCO2Value.setTextColor(Color.parseColor("#000000"));
+                        tvPPM.setTextColor(Color.parseColor("#000000"));
+                    }
                 }
             }
 
@@ -262,7 +289,7 @@ public class MainActivity extends AppCompatActivity
 
         if(!error)
         {
-            int CO2Threshold = Integer.parseInt(value);
+            CO2Threshold = Integer.parseInt(value);
 
             // Write data to sensor class
             sensor.setCO2Threshold(CO2Threshold);
@@ -273,7 +300,9 @@ public class MainActivity extends AppCompatActivity
             // Write a message to the database
             sensorConfigRef.setValue(sensor);
 
-            Toast.makeText(MainActivity.this, "Saved successfully!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this,
+                    "Saved successfully!",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 }
