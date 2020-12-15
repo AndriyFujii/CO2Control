@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity
 
     LineGraphSeries<DataPoint> series;
     GraphView valuesLinePlot;
-    private ArrayList<Integer> valuesArray;
     private int x;
     private boolean sentNotification;
 
@@ -119,6 +118,15 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    public void updateGraph(String dbCO2Value)
+    {
+        valuesLinePlot.getViewport().setMinX(x);
+        valuesLinePlot.getViewport().setMaxX(x+10);
+        series.appendData(new DataPoint(x, Integer.parseInt(dbCO2Value)), true, 100);
+        valuesLinePlot.addSeries(series);
+        x++;
+    }
+
     // Updates the sensor CO2 values from the database
     public void updateSensorValues()
     {
@@ -131,7 +139,35 @@ public class MainActivity extends AppCompatActivity
                 {
                     String dbCO2Value = snapshot.child("co2Value").getValue().toString();
 
+                    updateGraph(dbCO2Value);
+
                     tvCO2Value.setText(dbCO2Value);
+
+                    if(Integer.parseInt(dbCO2Value) > CO2Threshold)
+                    {
+                        tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
+                        tvPPM.setTextColor(Color.parseColor("#FF0000"));
+                        if(!sentNotification)
+                        {
+                            int reqCode = 1;
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+
+                            showNotification(MainActivity.this,
+                                    "Sensor " + String.valueOf(sensorID) + " warning!",
+                                    "CO2 over the threshold!",
+                                    intent,
+                                    reqCode);
+
+                            sentNotification = true;
+                        }
+                    }
+                    else
+                    {
+                        tvCO2Value.setTextColor(Color.parseColor("#000000"));
+                        tvPPM.setTextColor(Color.parseColor("#000000"));
+
+                        sentNotification = false;
+                    }
                 }
                 else
                 {
@@ -161,22 +197,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot)
             {
-                Toast.makeText(MainActivity.this,
-                        "Tentou atualizar",
-                        Toast.LENGTH_SHORT).show();
                 if(snapshot.exists())
                 {
                     String dbCO2Value = snapshot.child("co2Value").getValue().toString();
 
-                    valuesLinePlot.getViewport().setMinX(x);
-                    valuesLinePlot.getViewport().setMaxX(x+10);
-                    series.appendData(new DataPoint(x, Integer.parseInt(dbCO2Value)), true, 100);
-                    valuesLinePlot.addSeries(series);
-                    x++;
+                    updateGraph(dbCO2Value);
 
                     tvCO2Value.setText(dbCO2Value);
 
-                    valuesArray.add(Integer.parseInt(dbCO2Value));
                     if(Integer.parseInt(dbCO2Value) > CO2Threshold)
                     {
                         tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
@@ -258,7 +286,6 @@ public class MainActivity extends AppCompatActivity
         switchWindow = findViewById(R.id.switchWindow);
         switchAutomatic = findViewById(R.id.switchAutomatic);
         valuesLinePlot = findViewById(R.id.valuesPlot);
-        valuesArray = new ArrayList<>();
         series = new LineGraphSeries<>();
 
         sensor = new Sensor();
