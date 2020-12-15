@@ -2,9 +2,16 @@ package com.example.co2control;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -59,6 +66,7 @@ public class MainActivity extends AppCompatActivity
     GraphView valuesLinePlot;
     private ArrayList<Integer> valuesArray;
     private int x;
+    private boolean sentNotification;
 
     //Verifies if the editText is empty and pops an error if it is
     //Receives the editText as parameter
@@ -152,11 +160,27 @@ public class MainActivity extends AppCompatActivity
             manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-
-
-    private void createLinePlot()
+    // To show the notification
+    public void showNotification(Context context, String title, String message, Intent intent, int reqCode)
     {
+        //SharedPreferenceManager sharedPreferenceManager = SharedPreferenceManager.getInstance(context);
 
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, reqCode, intent, PendingIntent.FLAG_ONE_SHOT);
+        String CHANNEL_ID = "channel_name";// The id of the channel.
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_fan)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Channel Name";// The user-visible name of the channel.
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+            notificationManager.createNotificationChannel(mChannel);
+        }
+        notificationManager.notify(reqCode, notificationBuilder.build()); // 0 is the request code, it should be unique id
     }
 
     @Override
@@ -182,7 +206,7 @@ public class MainActivity extends AppCompatActivity
         CO2Threshold = 9999;
         x = 0;
         valuesLinePlot.getViewport().setXAxisBoundsManual(true);
-
+        sentNotification = false;
 
         sensorConfigRef = FirebaseDatabase.getInstance().getReference()
                 .child("SensorConfigs")
@@ -290,11 +314,26 @@ public class MainActivity extends AppCompatActivity
                     {
                         tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
                         tvPPM.setTextColor(Color.parseColor("#FF0000"));
+                        if(!sentNotification)
+                        {
+                            int reqCode = 1;
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+
+                            showNotification(MainActivity.this,
+                                    "Warning!",
+                                    "CO2 over the threshold!",
+                                    intent,
+                                    reqCode);
+
+                            sentNotification = true;
+                        }
                     }
                     else
                     {
                         tvCO2Value.setTextColor(Color.parseColor("#000000"));
                         tvPPM.setTextColor(Color.parseColor("#000000"));
+
+                        sentNotification = false;
                     }
                 }
             }
