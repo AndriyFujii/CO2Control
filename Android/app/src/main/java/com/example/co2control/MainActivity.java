@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 
                             showNotification(MainActivity.this,
-                                    "Warning!",
+                                    "Sensor " + String.valueOf(sensorID) + " warning!",
                                     "CO2 over the threshold!",
                                     intent,
                                     reqCode);
