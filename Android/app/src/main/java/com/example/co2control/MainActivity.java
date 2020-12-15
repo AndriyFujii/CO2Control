@@ -131,7 +131,6 @@ public class MainActivity extends AppCompatActivity
                 {
                     String dbCO2Value = snapshot.child("co2Value").getValue().toString();
 
-                   // tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
                     tvCO2Value.setText(dbCO2Value);
                 }
                 else
@@ -141,6 +140,68 @@ public class MainActivity extends AppCompatActivity
                             Toast.LENGTH_SHORT).show();
 
                     tvCO2Value.setText("----");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+
+            }
+        });
+    }
+
+
+    // Calling this sets, or updates the event listener
+    public void updateSensorValuesEventListener()
+    {
+        // Updates the ppm value whenever it changes with the one saved in the firebase
+        sensorValuesRef.addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                Toast.makeText(MainActivity.this,
+                        "Tentou atualizar",
+                        Toast.LENGTH_SHORT).show();
+                if(snapshot.exists())
+                {
+                    String dbCO2Value = snapshot.child("co2Value").getValue().toString();
+
+                    valuesLinePlot.getViewport().setMinX(x);
+                    valuesLinePlot.getViewport().setMaxX(x+10);
+                    series.appendData(new DataPoint(x, Integer.parseInt(dbCO2Value)), true, 100);
+                    valuesLinePlot.addSeries(series);
+                    x++;
+
+                    tvCO2Value.setText(dbCO2Value);
+
+                    valuesArray.add(Integer.parseInt(dbCO2Value));
+                    if(Integer.parseInt(dbCO2Value) > CO2Threshold)
+                    {
+                        tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
+                        tvPPM.setTextColor(Color.parseColor("#FF0000"));
+                        if(!sentNotification)
+                        {
+                            int reqCode = 1;
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+
+                            showNotification(MainActivity.this,
+                                    "Sensor " + String.valueOf(sensorID) + " warning!",
+                                    "CO2 over the threshold!",
+                                    intent,
+                                    reqCode);
+
+                            sentNotification = true;
+                        }
+                    }
+                    else
+                    {
+                        tvCO2Value.setTextColor(Color.parseColor("#000000"));
+                        tvPPM.setTextColor(Color.parseColor("#000000"));
+
+                        sentNotification = false;
+                    }
                 }
             }
 
@@ -216,6 +277,7 @@ public class MainActivity extends AppCompatActivity
                 .child(String.valueOf(sensorID));
 
         updateConfigValues();
+        updateSensorValuesEventListener();
 
         // Updates the sensor ID value when ENTER is pressed, and closes the keyboard
         etSensorID.setOnEditorActionListener(new TextView.OnEditorActionListener()
@@ -251,6 +313,7 @@ public class MainActivity extends AppCompatActivity
                                 .child(String.valueOf(sensorID));
                         updateConfigValues();
                         updateSensorValues();
+                        updateSensorValuesEventListener();
                     }
                 }
             }
@@ -291,59 +354,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        // Updates the ppm value whenever it changes with the one saved in the firebase
-        sensorValuesRef.addValueEventListener(new ValueEventListener()
-        {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
-            {
-                if(snapshot.exists())
-                {
-                    String dbCO2Value = snapshot.child("co2Value").getValue().toString();
 
-                    valuesLinePlot.getViewport().setMinX(x);
-                    valuesLinePlot.getViewport().setMaxX(x+10);
-                    series.appendData(new DataPoint(x, Integer.parseInt(dbCO2Value)), true, 100);
-                    valuesLinePlot.addSeries(series);
-                    x++;
-
-                    tvCO2Value.setText(dbCO2Value);
-
-                    valuesArray.add(Integer.parseInt(dbCO2Value));
-                    if(Integer.parseInt(dbCO2Value) > CO2Threshold)
-                    {
-                        tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
-                        tvPPM.setTextColor(Color.parseColor("#FF0000"));
-                        if(!sentNotification)
-                        {
-                            int reqCode = 1;
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-
-                            showNotification(MainActivity.this,
-                                    "Sensor " + String.valueOf(sensorID) + " warning!",
-                                    "CO2 over the threshold!",
-                                    intent,
-                                    reqCode);
-
-                            sentNotification = true;
-                        }
-                    }
-                    else
-                    {
-                        tvCO2Value.setTextColor(Color.parseColor("#000000"));
-                        tvPPM.setTextColor(Color.parseColor("#000000"));
-
-                        sentNotification = false;
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error)
-            {
-
-            }
-        });
     }
 
     public void onClickSave(View v)
