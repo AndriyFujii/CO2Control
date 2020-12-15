@@ -195,7 +195,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-
     // Calling this sets, or updates the event listener
     public void updateSensorValuesEventListener()
     {
@@ -325,6 +324,11 @@ public class MainActivity extends AppCompatActivity
                         updateConfigValues();
                         updateSensorValues();
                         updateSensorValuesEventListener();
+
+                        // Resetting the graph
+                        series = new LineGraphSeries<>();
+                        valuesLinePlot.removeAllSeries();
+                        x = 0;
                     }
                 }
             }
