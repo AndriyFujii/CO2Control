@@ -127,6 +127,38 @@ public class MainActivity extends AppCompatActivity
         x++;
     }
 
+    // Checks if the CO2 value is over the threshold
+    // Paints the CO2 value editText red and sends a notification if it is
+    // Paints the CO2 value editText black if it isn't
+    public void checkThreshold(int dbCO2Value)
+    {
+        if(dbCO2Value > CO2Threshold)
+        {
+            tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
+            tvPPM.setTextColor(Color.parseColor("#FF0000"));
+            if(!sentNotification)
+            {
+                int reqCode = 1;
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+
+                showNotification(MainActivity.this,
+                        "Sensor " + String.valueOf(sensorID) + " warning!",
+                        "CO2 over the threshold!",
+                        intent,
+                        reqCode);
+
+                sentNotification = true;
+            }
+        }
+        else
+        {
+            tvCO2Value.setTextColor(Color.parseColor("#000000"));
+            tvPPM.setTextColor(Color.parseColor("#000000"));
+
+            sentNotification = false;
+        }
+    }
+
     // Updates the sensor CO2 values from the database
     public void updateSensorValues()
     {
@@ -143,31 +175,7 @@ public class MainActivity extends AppCompatActivity
 
                     tvCO2Value.setText(dbCO2Value);
 
-                    if(Integer.parseInt(dbCO2Value) > CO2Threshold)
-                    {
-                        tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
-                        tvPPM.setTextColor(Color.parseColor("#FF0000"));
-                        if(!sentNotification)
-                        {
-                            int reqCode = 1;
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-
-                            showNotification(MainActivity.this,
-                                    "Sensor " + String.valueOf(sensorID) + " warning!",
-                                    "CO2 over the threshold!",
-                                    intent,
-                                    reqCode);
-
-                            sentNotification = true;
-                        }
-                    }
-                    else
-                    {
-                        tvCO2Value.setTextColor(Color.parseColor("#000000"));
-                        tvPPM.setTextColor(Color.parseColor("#000000"));
-
-                        sentNotification = false;
-                    }
+                    checkThreshold(Integer.parseInt(dbCO2Value));
                 }
                 else
                 {
@@ -205,31 +213,7 @@ public class MainActivity extends AppCompatActivity
 
                     tvCO2Value.setText(dbCO2Value);
 
-                    if(Integer.parseInt(dbCO2Value) > CO2Threshold)
-                    {
-                        tvCO2Value.setTextColor(Color.parseColor("#FF0000"));
-                        tvPPM.setTextColor(Color.parseColor("#FF0000"));
-                        if(!sentNotification)
-                        {
-                            int reqCode = 1;
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-
-                            showNotification(MainActivity.this,
-                                    "Sensor " + String.valueOf(sensorID) + " warning!",
-                                    "CO2 over the threshold!",
-                                    intent,
-                                    reqCode);
-
-                            sentNotification = true;
-                        }
-                    }
-                    else
-                    {
-                        tvCO2Value.setTextColor(Color.parseColor("#000000"));
-                        tvPPM.setTextColor(Color.parseColor("#000000"));
-
-                        sentNotification = false;
-                    }
+                    checkThreshold(Integer.parseInt(dbCO2Value));
                 }
             }
 
