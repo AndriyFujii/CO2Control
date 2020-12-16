@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "830368697476",
+    "project_id": "co2control-54e55",
+    "storage_bucket": "co2control-54e55.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830368697476:android:6ba16b3c075801576f06d1",
+        "android_client_info": {
+          "package_name": "com.example.co2control"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "830368697476-it14usiesp26urn6kin5b0cimq6e585g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1Yv6kwr8RsDXeIszsTyE5rqHbFRhirNE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "830368697476-it14usiesp26urn6kin5b0cimq6e585g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
